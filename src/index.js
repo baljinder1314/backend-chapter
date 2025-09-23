@@ -10,7 +10,7 @@ connectDB()
       console.log(`App is not Listing: ${err}`);
     });
     app.listen(process.env.PORT || 8000, () => {
-      console.log(`Server stated at ${process.env.PORT}`);
+      console.log(`Server stated at http://localhost:${process.env.PORT}`);
     });
   })
   .catch((err) => {
