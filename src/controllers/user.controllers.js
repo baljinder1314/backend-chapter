@@ -1,5 +1,8 @@
+import { upload } from "../middlewares/multer.middleware.js";
+import { User } from "../models/user.models.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandle } from "../utils/asycHandle.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 export const registerUser = asyncHandle(async (req, res) => {
   // get user detail from frontend
@@ -17,9 +20,28 @@ export const registerUser = asyncHandle(async (req, res) => {
   if (
     [username, email, fullName, password].some((input) => input?.trim() === "")
   ) {
-    throw new ApiError(400,"each fields is required" );
-    // console.log("error");
+    throw new ApiError(400, "each fields is required");
+  }
+
+  const existingUser = await User.findOne({
+    $or: [{ username }, { email }],
+  });
+
+  if (existingUser) {
+    throw new ApiError(400, "User aleady exist");
   }
 
   
+  const avatarLocalFilePath = req.files?.avatar[0]?.path;
+  const converImageLocalFilePath = req.files?.coverImage[0]?.path;
+
+  console.log({
+    name: "local image path",
+    1: avatarLocalFilePath,
+    2: converImageLocalFilePath,
+  });
+  const avatar = await uploadOnCloudinary(avatarLocalFilePath);
+  const converImage = await uploadOnCloudinary(converImageLocalFilePath);
+
+  console.log({ 1: avatar, 2: converImage });
 });

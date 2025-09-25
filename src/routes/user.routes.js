@@ -13,7 +13,7 @@ routes.route("/register").get(
     {
       name: "coverImage",
       maxCount: 1,
-    }, 
+    },
   ]),
   registerUser
 );
