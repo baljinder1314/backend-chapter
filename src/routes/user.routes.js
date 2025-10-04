@@ -1,10 +1,15 @@
 import { Router } from "express";
-import { registerUser } from "../controllers/user.controllers.js";
+import {
+  loggedOut,
+  loginUser,
+  registerUser,
+} from "../controllers/user.controllers.js";
 import { upload } from "../middlewares/multer.middleware.js";
+import { varityJwt } from "../middlewares/auth.middleware.js";
 
 const routes = Router();
 
-routes.route("/register").get(
+routes.route("/register").post(
   upload.fields([
     {
       name: "avatar",
@@ -17,6 +22,7 @@ routes.route("/register").get(
   ]),
   registerUser
 );
-// routes.get("/register", registerUser);
+routes.route("/login").post(loginUser);
 
+routes.route("/loggedOut").post(varityJwt, loggedOut);
 export default routes;
