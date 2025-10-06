@@ -5,7 +5,7 @@ import { APP_NAME } from "../constants.js";
 const connectDB = async () => {
   try {
     const connectingString = await mongoose.connect(
-      `${process.env.MONGO_DB}/${APP_NAME}`
+      `${process.env.MONGO_DB }/${APP_NAME}`
     );
     console.log(`Connecting String: ${connectingString.connection.host}`);
   } catch (error) {

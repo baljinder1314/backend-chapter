@@ -12,7 +12,6 @@ cloudinary.config({
 });
 
 export const uploadOnCloudinary = async (localFilePath) => {
-
   try {
     const uploadResult = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "auto",
@@ -21,6 +20,6 @@ export const uploadOnCloudinary = async (localFilePath) => {
     fs.unlinkSync(localFilePath);
     return uploadResult;
   } catch (error) {
-    console.log("Error while uploading on cloudinary: ", error);
+    throw new ApiError(500, `photos didn't upload on cloudinary`);
   }
 };
