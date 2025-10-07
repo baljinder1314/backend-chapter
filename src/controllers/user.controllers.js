@@ -181,3 +181,22 @@ export const regenerateAccessAndRefreshToken = async (req, res) => {
       )
     );
 };
+
+export const changePassword = asyncHandle(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  const user = await User.findById(req.user?._id);
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+
+  if (!isPasswordCorrect) {
+    throw new ApiError(406, "Invalid old Password");
+  }
+
+  user.password = newPassword;
+  user.save({ validateBeforeSave: false });
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password changed Successfuly"));
+});
+
