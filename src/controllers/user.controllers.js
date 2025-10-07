@@ -200,3 +200,35 @@ export const changePassword = asyncHandle(async (req, res) => {
     .json(new ApiResponse(200, {}, "Password changed Successfuly"));
 });
 
+export const getCurrentUser = asyncHandle(async (req, res) => {
+  if (!req.user) {
+    throw new ApiError(400, "user Not Found");
+  }
+  res
+    .status(200)
+    .json(new ApiResponse(200, req.user, "Current User Fetched Successfuly"));
+});
+
+export const updateAccountDetails = asyncHandle(async (req, res) => {
+  const { fullName, email } = req.body;
+
+  if (!(fullName && email)) {
+    throw new ApiError(406, "fullName and email is required");
+  }
+  const updatedFields = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        fullName,
+        email,
+      },
+    },
+    { new: true }
+  ).select("-password -refreshToken");
+
+  req
+    .status(200)
+    .json(
+      new ApiResponse(200, updatedFields, "Fullname and email has been updated")
+    );
+});

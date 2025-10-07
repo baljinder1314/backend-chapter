@@ -1,10 +1,12 @@
 import { Router } from "express";
 import {
   changePassword,
+  getCurrentUser,
   loggedOut,
   loginUser,
   regenerateAccessAndRefreshToken,
   registerUser,
+  updateAccountDetails,
 } from "../controllers/user.controllers.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { varityJwt } from "../middlewares/auth.middleware.js";
@@ -28,6 +30,8 @@ routes.route("/login").post(loginUser);
 
 routes.route("/loggedOut").post(varityJwt, loggedOut);
 routes.route("/refresh-token").post(regenerateAccessAndRefreshToken);
-routes.route("/change-password").post(varityJwt , changePassword);
+routes.route("/change-password").post(varityJwt, changePassword);
+routes.route("/current-user").post(varityJwt, getCurrentUser);
+routes.route("/updated-details").post(varityJwt, updateAccountDetails);
 
 export default routes;
