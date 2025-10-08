@@ -232,3 +232,33 @@ export const updateAccountDetails = asyncHandle(async (req, res) => {
       new ApiResponse(200, updatedFields, "Fullname and email has been updated")
     );
 });
+
+export const updateUserAvatar = asyncHandle(async (req, res) => {
+  const newPhotoGetFromTheUser = req.file?.path;
+
+  if (!newPhotoGetFromTheUser) {
+    throw new ApiError(400, "Photo is Required");
+  }
+
+  const uploadedPhoto = await uploadOnCloudinary(newPhotoGetFromTheUser);
+
+  if (!uploadedPhoto) {
+    throw new ApiError(500, "Not uploaded on Internet");
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        avatar: uploadedPhoto.url,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
+  console.log(user);
+
+  //delete old photo from the cloudinary
+});
