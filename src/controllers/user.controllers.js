@@ -278,11 +278,15 @@ export const updateUserAvatar = asyncHandle(async (req, res) => {
 
 export const updateUserCoverImage = asyncHandle(async (req, res) => {
   const oldcoverImagePublicId = req.user?.coverImagePublicId;
+
   if (!oldcoverImagePublicId) {
     throw new ApiError(400, "Error while daleting Cover Image");
   }
+
   const ok_2 = await deletePhotoOnCloudinary(oldcoverImagePublicId);
+
   const newCoverImage = await uploadOnCloudinary(req.files?.coverImage[0].path);
+
   if (!newCoverImage) {
     throw new ApiError("Error while updating on cloudinary");
   }
@@ -292,7 +296,6 @@ export const updateUserCoverImage = asyncHandle(async (req, res) => {
     {
       $set: {
         coverImage: newCoverImage.url,
-
         coverImagePublicId: newCoverImage.public_id,
       },
     },
