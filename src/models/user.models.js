@@ -33,8 +33,15 @@ const userSchema = new Schema(
       type: String, //cloudnory
       required: true,
     },
+
+    avatarPublicId: {
+      type: String,
+    },
     coverImage: {
       type: String, //cloudnory
+    },
+    coverImagePublicId: {
+      type: String,
     },
     watchHistory: [
       {

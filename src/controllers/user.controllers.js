@@ -1,7 +1,10 @@
 import { User } from "../models/user.models.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandle } from "../utils/asycHandle.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {
+  deletePhotoOnCloudinary,
+  uploadOnCloudinary,
+} from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 
@@ -65,6 +68,8 @@ export const registerUser = asyncHandle(async (req, res) => {
     password,
     avatar: avatar?.url,
     coverImage: coverImage?.url || "",
+    avatarPublicId: avatar?.public_id,
+    coverImagePublicId: coverImage?.public_id,
   });
 
   const createdUser = await User.findById(user._id).select(
@@ -234,31 +239,37 @@ export const updateAccountDetails = asyncHandle(async (req, res) => {
 });
 
 export const updateUserAvatar = asyncHandle(async (req, res) => {
-  const newPhotoGetFromTheUser = req.file?.path;
+  const oldAvatarPublicId = req.user?.avatarPublicId;
+  const oldcoverImagePublicId = req.user?.coverImagePublicId;
 
-  if (!newPhotoGetFromTheUser) {
-    throw new ApiError(400, "Photo is Required");
+  if (!(oldAvatarPublicId && oldcoverImagePublicId)) {
+    throw new ApiError(500, "Old Pics are deleted");
   }
 
-  const uploadedPhoto = await uploadOnCloudinary(newPhotoGetFromTheUser);
+  await deletePhotoOnCloudinary(oldAvatarPublicId);
+  await deletePhotoOnCloudinary(oldcoverImagePublicId);
 
-  if (!uploadedPhoto) {
-    throw new ApiError(500, "Not uploaded on Internet");
+  const newAvatar = await uploadOnCloudinary(req.files?.avatar[0].path);
+  const newCoverImage = await uploadOnCloudinary(req.files?.coverImage[0].path);
+
+  if (!(newAvatar && newCoverImage)) {
+    throw new ApiError(405, "twise are required");
   }
 
-  const user = await User.findByIdAndUpdate(
+  const updateAvatar = await User.findByIdAndUpdate(
     req.user._id,
     {
       $set: {
-        avatar: uploadedPhoto.url,
+        avatar: newAvatar.url,
+        coverImage: newCoverImage.url,
+        avatarPublicId: newAvatar.public_id,
+        coverImagePublicId: newCoverImage.public_id,
       },
     },
-    {
-      new: true,
-    }
-  );
+    { new: true }
+  ).select("-password -refreshToken");
 
-  console.log(user);
-
-  //delete old photo from the cloudinary
+  res
+    .status(200)
+    .json(new ApiResponse(200, updateAvatar, "Avatar Successfuly update"));
 });

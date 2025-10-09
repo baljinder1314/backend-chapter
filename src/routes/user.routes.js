@@ -34,8 +34,19 @@ routes.route("/refresh-token").post(regenerateAccessAndRefreshToken);
 routes.route("/change-password").post(varityJwt, changePassword);
 routes.route("/current-user").post(varityJwt, getCurrentUser);
 routes.route("/updated-details").post(varityJwt, updateAccountDetails);
-routes
-  .route("/updated-avatar")
-  .post(varityJwt, upload.single("avatar"), updateUserAvatar);
+routes.route("/updated-avatar").post(
+  varityJwt,
+  upload.fields([
+    {
+      name: "avatar",
+      maxCount: 1,
+    },
+    {
+      name: "coverImage",
+      maxCount: 1,
+    },
+  ]),
+  updateUserAvatar
+);
 
 export default routes;

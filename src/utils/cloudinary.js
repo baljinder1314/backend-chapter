@@ -23,3 +23,13 @@ export const uploadOnCloudinary = async (localFilePath) => {
     throw new ApiError(500, `photos didn't upload on cloudinary`);
   }
 };
+
+export const deletePhotoOnCloudinary = async (oldPublicId) => {
+  try {
+    if (!oldPublicId) return null;
+    const oldPic = await cloudinary.uploader.destroy(oldPublicId);
+    return oldPic;
+  } catch (error) {
+    throw new ApiError(500, "Not deleted old Photo from the user");
+  }
+};
