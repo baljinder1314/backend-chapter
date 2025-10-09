@@ -240,29 +240,59 @@ export const updateAccountDetails = asyncHandle(async (req, res) => {
 
 export const updateUserAvatar = asyncHandle(async (req, res) => {
   const oldAvatarPublicId = req.user?.avatarPublicId;
-  const oldcoverImagePublicId = req.user?.coverImagePublicId;
 
-  if (!(oldAvatarPublicId && oldcoverImagePublicId)) {
+  if (!oldAvatarPublicId) {
     throw new ApiError(500, "Old Pics are deleted");
   }
 
-  await deletePhotoOnCloudinary(oldAvatarPublicId);
-  await deletePhotoOnCloudinary(oldcoverImagePublicId);
+  const ok_1 = await deletePhotoOnCloudinary(oldAvatarPublicId);
 
   const newAvatar = await uploadOnCloudinary(req.files?.avatar[0].path);
-  const newCoverImage = await uploadOnCloudinary(req.files?.coverImage[0].path);
 
-  if (!(newAvatar && newCoverImage)) {
-    throw new ApiError(405, "twise are required");
+  if (!newAvatar) {
+    throw new ApiError(405, "Error while updating Avatar and cover Image");
   }
 
   const updateAvatar = await User.findByIdAndUpdate(
-    req.user._id,
+    req.user?._id,
     {
       $set: {
         avatar: newAvatar.url,
-        coverImage: newCoverImage.url,
+
         avatarPublicId: newAvatar.public_id,
+      },
+    },
+    { new: true }
+  ).select("-password -refreshToken");
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { updateAvatar, oldAvatardelete: ok_1 },
+        "Avatar Successfuly update"
+      )
+    );
+});
+
+export const updateUserCoverImage = asyncHandle(async (req, res) => {
+  const oldcoverImagePublicId = req.user?.coverImagePublicId;
+  if (!oldcoverImagePublicId) {
+    throw new ApiError(400, "Error while daleting Cover Image");
+  }
+  const ok_2 = await deletePhotoOnCloudinary(oldcoverImagePublicId);
+  const newCoverImage = await uploadOnCloudinary(req.files?.coverImage[0].path);
+  if (!newCoverImage) {
+    throw new ApiError("Error while updating on cloudinary");
+  }
+
+  const updateAvatar = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        coverImage: newCoverImage.url,
+
         coverImagePublicId: newCoverImage.public_id,
       },
     },
@@ -271,5 +301,11 @@ export const updateUserAvatar = asyncHandle(async (req, res) => {
 
   res
     .status(200)
-    .json(new ApiResponse(200, updateAvatar, "Avatar Successfuly update"));
+    .json(
+      new ApiResponse(
+        200,
+        { updateAvatar, oldCoverImageDelete: ok_2 },
+        "Avatar Successfuly update"
+      )
+    );
 });

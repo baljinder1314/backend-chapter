@@ -8,6 +8,7 @@ import {
   registerUser,
   updateAccountDetails,
   updateUserAvatar,
+  updateUserCoverImage,
 } from "../controllers/user.controllers.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { varityJwt } from "../middlewares/auth.middleware.js";
@@ -41,12 +42,18 @@ routes.route("/updated-avatar").post(
       name: "avatar",
       maxCount: 1,
     },
+  ]),
+  updateUserAvatar
+);
+routes.route("/updated-cover-image").post(
+  varityJwt,
+  upload.fields([
     {
       name: "coverImage",
       maxCount: 1,
     },
   ]),
-  updateUserAvatar
+  updateUserCoverImage
 );
 
 export default routes;
