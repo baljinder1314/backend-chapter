@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   changePassword,
   getCurrentUser,
+  getUserChannelProfile,
   loggedOut,
   loginUser,
   regenerateAccessAndRefreshToken,
@@ -56,4 +57,5 @@ routes.route("/updated-cover-image").post(
   updateUserCoverImage
 );
 
+routes.route("/get-user-channel").post(getUserChannelProfile);
 export default routes;

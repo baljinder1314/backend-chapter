@@ -62,7 +62,7 @@ export const registerUser = asyncHandle(async (req, res) => {
   }
 
   const user = await User.create({
-    username,
+    username: username?.toLowerCase(),
     email,
     fullName,
     password,
@@ -311,4 +311,74 @@ export const updateUserCoverImage = asyncHandle(async (req, res) => {
         "Avatar Successfuly update"
       )
     );
+});
+
+export const getUserChannelProfile = asyncHandle(async (req, res) => {
+  const { username } = req.params;
+
+  if (username) {
+    throw new ApiError(400, "User name is missing");
+  }
+
+  const channel = await User.aggregate([
+    {
+      $match: {
+        username: username?.toLowerCase(),
+      },
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "channels ",
+        as: "subscibers",
+      },
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "subscriber ",
+        as: "subscibed ",
+      },
+    },
+    {
+      $addFields: {
+        subscibersCount: {
+          $size: "$subscibers",
+        },
+        channelsSubscibedToCount: {
+          $size: "$subscibed",
+        },
+        isSubscibed: {
+          $cond: {
+            if: { $in: [req.user?._id, "$subscibers.subscriber"] },
+            then: true,
+            else: false,
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        email: 1,
+        fullName: 1,
+        avatar: 1,
+        coverImage: 1,
+        subscibersCount: 1,
+        channelsSubscibedToCount: 1,
+        isSubscibed: 1,
+      },
+    },
+  ]);
+
+
+  console.log(channel)
+  if (!channel?.length) {
+    throw new ApiError(400, "channel does not exist");
+  }
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, channel[0], "channel fetched successfuly"));
 });
