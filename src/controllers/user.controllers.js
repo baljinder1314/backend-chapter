@@ -135,8 +135,8 @@ export const loggedOut = asyncHandle(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: {
-        refreshToken: undefined,
+      $unset: {
+        refreshToken: 1,
       },
     },
     {
@@ -372,8 +372,7 @@ export const getUserChannelProfile = asyncHandle(async (req, res) => {
     },
   ]);
 
-
-  console.log(channel)
+  console.log(channel);
   if (!channel?.length) {
     throw new ApiError(400, "channel does not exist");
   }
